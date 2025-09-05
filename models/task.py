@@ -1,6 +1,8 @@
-from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy import Column, DateTime, Integer, String
 from sqlalchemy.sql import func
+
 from config.db import Base
+
 
 class Task(Base):
     __tablename__ = "tasks"

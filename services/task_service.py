@@ -1,8 +1,11 @@
+from typing import List, Optional
+
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+
 from models.task import Task
 from schemas.task import TaskCreate, TaskUpdate
-from typing import List, Optional
+
 
 async def create_task(db: AsyncSession, task_create: TaskCreate) -> Task:
     """
@@ -17,6 +20,7 @@ async def create_task(db: AsyncSession, task_create: TaskCreate) -> Task:
     await db.refresh(task)  # чтобы получить id и дату создания
     return task
 
+
 async def get_task(db: AsyncSession, task_id: int) -> Optional[Task]:
     """
     Получение задачи по ID.
@@ -27,16 +31,27 @@ async def get_task(db: AsyncSession, task_id: int) -> Optional[Task]:
     result = await db.execute(select(Task).where(Task.id == task_id))
     return result.scalars().first()
 
-async def get_all_tasks(db: AsyncSession) -> List[Task]:
-    """
-    Получение всех задач.
-    :param db: сессия базы данных
-    :return: список Task
-    """
-    result = await db.execute(select(Task))
-    return result.scalars().all()
 
-async def update_task(db: AsyncSession, task_id: int, task_update: TaskUpdate) -> Optional[Task]:
+async def get_all_tasks(
+    db: AsyncSession, limit: int = 10, search: Optional[str] = None
+) -> List[Task]:
+    """
+    Получение всех задач с фильтрацией.
+    :param db: сессия базы данных
+    :param limit: сколько записей вернуть
+    :param search: поиск по названию
+    """
+    query = select(Task)
+    if search:
+        query = query.where(Task.title.ilike(f"%{search}%"))
+    result = await db.execute(query.limit(limit))
+    tasks: List[Task] = list(result.scalars().all())
+    return tasks
+
+
+async def update_task(
+    db: AsyncSession, task_id: int, task_update: TaskUpdate
+) -> Optional[Task]:
     """
     Обновление задачи по ID.
     :param db: сессия базы данных
@@ -53,6 +68,7 @@ async def update_task(db: AsyncSession, task_id: int, task_update: TaskUpdate) -
     await db.commit()
     await db.refresh(task)
     return task
+
 
 async def delete_task(db: AsyncSession, task_id: int) -> bool:
     """

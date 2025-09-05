@@ -1,87 +1,157 @@
-# FastAPI CRUD Test
+# 💻FastAPI CRUD Test
 
-Тестовое задание: реализация CRUD API с использованием **FastAPI**, **Pydantic** и **PostgreSQL**.  
-Приложение поддерживает работу с сущностями (создание, чтение, обновление, удаление).
+Простой CRUD-проект на FastAPI с асинхронным доступом к PostgreSQL.  
+Позволяет создавать, получать, обновлять и удалять задачи через REST API.  
 
----
+## 🐾Стек технологий
 
-## 📂 Структура проекта
+- **Python**
+- **FastAPI** – веб-фреймворк для API
+- **SQLAlchemy** – ORM для работы с базой данных
+- **PostgreSQL** – реляционная база данных
+- **asyncpg** – асинхронный драйвер для PostgreSQL
+- **Docker & Docker Compose** – контейнеризация приложения и базы данных
+- **Uvicorn** – ASGI сервер для запуска FastAPI
+- **Pydantic** – валидация и сериализация данных
+- **Swagger / OpenAPI** – документация API
 
-fastapi-crud-test/ # Корневая директория проекта
-├── .venv/ # Виртуальное окружение (не коммитится)
-├── config/ # Конфигурация приложения
-│ ├── init.py
-│ └── (config.py, settings.py)
-├── models/ # ORM-модели (SQLAlchemy)
-│ ├── init.py
-│ └── (item.py, user.py)
-├── routers/ # Эндпоинты API (роутеры FastAPI)
-│ ├── init.py
-│ └── (items.py, users.py)
-├── schemas/ # Pydantic-схемы (валидация, сериализация)
-│ ├── init.py
-│ └── (item.py, user.py)
-├── services/ # Бизнес-логика (сервисный слой)
-│ ├── init.py
-│ └── (item_service.py)
-├── .gitignore # Игнорируемые файлы для Git
-├── main.py # Точка входа (создание FastAPI-приложения)
-├── README.md # Описание проекта
-└── requirements.txt # Зависимости Python
+## 📂Структура проекта
 
-
+```text
+fastapi-crud-test/
+├── main.py           # Точка входа приложения FastAPI
+├── routers/          # Роутеры (эндпоинты API)
+│   └── task.py
+├── models/           # Модель задачи
+│   └── task.py
+├── schemas/          # Pydantic-схемы для валидации данных
+│   └── task.py
+├── services/         # Логика работы с базой (CRUD-функции)
+│   └── task_service.py
+├── config/           # Настройки и подключение к БД
+│   ├── db.py
+│   └── settings.py
+├── .env                  # Переменные окружения (БД, порты и т.д.)
+├── requirements.txt      # Зависимости Python
+├── Dockerfile            # Инструкция для сборки Docker-образа
+├── docker-compose.yml    # Сборка приложения + БД через Docker
+└── README.md             # Документация проекта
+```
 ---
 
 ## 🚀 Запуск проекта
 
-### 1. Клонирование репозитория
+### 1. Клонируем репозиторий
+
 ```bash
-git clone https://github.com/YOUR_USERNAME/fastapi-crud-test.git
+# клонируем репозиторий
+git clone https://github.com/Kirill-Taras/fastapi-crud-test.git
+# переходим в папку проекта
 cd fastapi-crud-test
-2. Установка зависимостей
+```
 
-Создать виртуальное окружение и активировать:
-
+### 2. Создаем виртуальное окружение и активируем его
+```bash
 python -m venv .venv
-.venv\Scripts\activate   # Windows
-source .venv/bin/activate   # Linux/Mac
+# Windows
+.venv\Scripts\activate
+# macOS/Linux
+source .venv/bin/activate
+```
 
-
-Установить пакеты:
-
+### 3. Устанавливаем зависимости
+```bash
+pip install --upgrade pip
 pip install -r requirements.txt
+```
+### 4. Настраиваем переменные окружения
+```bash
+Создайте файл .env в корне проекта и заполните его:
 
-3. Запуск приложения
+POSTGRES_DB=name_db
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=pass
+POSTGRES_HOST=localhost
+POSTGRES_PORT=5432
+
+DATABASE_URL=postgresql+asyncpg://postgres:pass@localhost:5432/name_db
+
+```
+⚠️ Для работы проекта необходима локальная или удалённая PostgreSQL база.
+
+### 5. Создаем базу данных fastapi_db в PostgreSQL (если еще нет):
+```bash
+CREATE DATABASE fastapi_db;
+```
+### 6. Запуск приложения:
+```bash
 uvicorn main:app --reload
+```
 
+Сервер будет доступен по адресу: http://127.0.0.1:8000/tasks/
 
-API будет доступно по адресу:
+### 7. Доступ к документации
+```bash
+Swagger: http://127.0.0.1:8000/docs/
+```
 
-http://127.0.0.1:8000/docs
+## 🐳 Запуск через Docker
 
-🛠 Технологии
+### 1. Клонируем репозиторий
+```bash
+# клонируем репозиторий
+git clone https://github.com/Kirill-Taras/fastapi-crud-test.git
+# переходим в папку проекта
+cd fastapi-crud-test
+```
 
-FastAPI
+### 2. Настраиваем переменные окружения
+Создайте файл .env в корне проекта и заполните его:
+```bas
+POSTGRES_DB=fastapi_db
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=pass
+POSTGRES_HOST=db
+POSTGRES_PORT=5432
 
-Pydantic
+DATABASE_URL=postgresql+asyncpg://postgres:pass@db:5432/fastapi_db
+```
 
-SQLAlchemy
+### 3. Сборка и запуск контейнеров:
 
-PostgreSQL
+```bash
+docker compose up -d --build
+```
 
-Alembic
- (миграции)
+### 4. Проверяем работу приложения:
 
-📌 Задачи (MVP)
+```bash
+Swagger UI: http://127.0.0.1:8000/docs
 
- Настроить подключение к Postgres
+Эндпоинты CRUD: /tasks/, /tasks/{id}
+```
 
- Определить модели и схемы
+### 5. Просмотр логов контейнеров:
 
- Реализовать CRUD-операции
+```bash
+docker compose logs -f web
+docker compose logs -f db
+```
 
- Добавить эндпоинты
+### 6. Остановка и удаление контейнеров:
 
- Подключить Docker/Docker Compose
+```bash
+docker compose down
+```
 
- Обновить документацию
+## 🕹️ Эндпоинты
+
+| Метод | URL                  | Описание                              |
+|-------|--------------------|---------------------------------------|
+| GET   | /tasks/             | Получить список всех задач            |
+| GET   | /tasks/{id}         | Получить задачу по ID                 |
+| POST  | /tasks/             | Создать новую задачу                   |
+| PUT   | /tasks/{id}         | Обновить задачу по ID                  |
+| DELETE| /tasks/{id}         | Удалить задачу по ID                   |
+
+### 🧑‍💼Разработчик: Тарасов Кирилл
